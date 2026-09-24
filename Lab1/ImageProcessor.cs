@@ -125,5 +125,90 @@ namespace Lab1
 
             return histogram;
         }
+
+        public static WriteableBitmap ExtractChannel(WriteableBitmap source, char channel)
+        {
+            int width = source.PixelWidth;
+            int height = source.PixelHeight;
+            int stride = width * 4;
+
+            byte[] pixels = new byte[height * stride];
+
+            source.CopyPixels(pixels, stride, 0);
+
+            for (int i = 0; i < pixels.Length; i += 4)
+            {
+                byte b = pixels[i];
+                byte g = pixels[i + 1];
+                byte r = pixels[i + 2];
+
+                switch (char.ToUpper(channel))
+                {
+                    case 'R':
+                        pixels[i] = 0;
+                        pixels[i + 1] = 0;
+                        pixels[i + 2] = r;
+                        break;
+
+                    case 'G':
+                        pixels[i] = 0;
+                        pixels[i + 1] = g;
+                        pixels[i + 2] = 0;
+                        break;
+
+                    case 'B':
+                        pixels[i] = b;
+                        pixels[i + 1] = 0;
+                        pixels[i + 2] = 0;
+                        break;
+
+                    default:
+                        throw new ArgumentException("Канал должен быть R, G или B");
+                }
+            }
+
+            var result = new WriteableBitmap(
+                width,
+                height,
+                96,
+                96,
+                PixelFormats.Bgra32,
+                null);
+
+            result.WritePixels(
+                new System.Windows.Int32Rect(0, 0, width, height),
+                pixels,
+                stride,
+                0);
+
+            return result;
+        }
+        public static void CalculateRgbHistograms(WriteableBitmap bitmap, out int[] redHistogram, out int[] greenHistogram, out int[] blueHistogram)
+        {
+            int width = bitmap.PixelWidth;
+            int height = bitmap.PixelHeight;
+            int stride = width * 4;
+
+            byte[] pixels = new byte[height * stride];
+
+            bitmap.CopyPixels(pixels, stride, 0);
+
+            redHistogram = new int[256];
+            greenHistogram = new int[256];
+            blueHistogram = new int[256];
+
+            for (int i = 0; i < pixels.Length; i += 4)
+            {
+                byte b = pixels[i];
+                byte g = pixels[i + 1];
+                byte r = pixels[i + 2];
+
+                redHistogram[r]++;
+                greenHistogram[g]++;
+                blueHistogram[b]++;
+            }
+        }
+
+
     }
 }

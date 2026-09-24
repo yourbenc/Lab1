@@ -14,6 +14,11 @@ namespace Lab1
         private WriteableBitmap _grayscale1Bitmap; // PAL/NTSC
         private WriteableBitmap _grayscale2Bitmap; // HDTV
         private WriteableBitmap _differenceBitmap;
+
+        private WriteableBitmap _redChannelBitmap;
+        private WriteableBitmap _greenChannelBitmap;
+        private WriteableBitmap _blueChannelBitmap;
+
         private string _currentFilePath;
 
         public MainWindow()
@@ -85,6 +90,31 @@ namespace Lab1
             // Гистограммы
             DrawHistogram(Histogram1Canvas, _grayscale1Bitmap, Colors.Blue);
             DrawHistogram(Histogram2Canvas, _grayscale2Bitmap, Colors.Red);
+
+
+            // Задание 2: выделяем каналы R, G, B
+            _redChannelBitmap = ImageProcessor.ExtractChannel(sourceBitmap, 'R');
+            _greenChannelBitmap = ImageProcessor.ExtractChannel(sourceBitmap, 'G');
+            _blueChannelBitmap = ImageProcessor.ExtractChannel(sourceBitmap, 'B');
+
+            // Отображаем каналы
+            RedChannelImage.Source = _redChannelBitmap;
+            GreenChannelImage.Source = _greenChannelBitmap;
+            BlueChannelImage.Source = _blueChannelBitmap;
+
+            // Гистограммы RGB
+            ImageProcessor.CalculateRgbHistograms(
+                sourceBitmap,
+                out int[] redHistogram,
+                out int[] greenHistogram,
+                out int[] blueHistogram);
+
+            DrawColorHistogram(RedHistogramCanvas, redHistogram, Colors.Red);
+            DrawColorHistogram(GreenHistogramCanvas, greenHistogram, Colors.Green);
+            DrawColorHistogram(BlueHistogramCanvas, blueHistogram, Colors.Blue);
+
+
+
         }
 
         private WriteableBitmap ConvertToWritableBitmap(BitmapSource source)
@@ -128,6 +158,44 @@ namespace Lab1
                 canvas.Children.Add(rectangle);
             }
         }
+
+        private void DrawColorHistogram(Canvas canvas, int[] histogram, Color barColor)
+        {
+            canvas.Children.Clear();
+
+            int maxCount = 0;
+
+            foreach (int count in histogram)
+            {
+                if (count > maxCount)
+                    maxCount = count;
+            }
+
+            if (maxCount == 0) return;
+
+            double canvasWidth = canvas.Width;
+            double canvasHeight = canvas.Height;
+            double barWidth = canvasWidth / 256.0;
+
+            for (int i = 0; i < 256; i++)
+            {
+                double barHeight =
+                    (double)histogram[i] / maxCount * canvasHeight;
+
+                var rectangle = new System.Windows.Shapes.Rectangle
+                {
+                    Width = Math.Max(barWidth, 1),
+                    Height = barHeight,
+                    Fill = new SolidColorBrush(barColor)
+                };
+
+                Canvas.SetLeft(rectangle, i * barWidth);
+                Canvas.SetBottom(rectangle, 0);
+
+                canvas.Children.Add(rectangle);
+            }
+        }
+
 
         private void SaveBitmapToFile(WriteableBitmap bitmap, string filePath)
         {
