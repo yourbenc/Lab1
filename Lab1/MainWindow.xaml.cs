@@ -14,11 +14,10 @@ namespace Lab1
         private WriteableBitmap _grayscale1Bitmap; // PAL/NTSC
         private WriteableBitmap _grayscale2Bitmap; // HDTV
         private WriteableBitmap _differenceBitmap;
-
         private WriteableBitmap _redChannelBitmap;
         private WriteableBitmap _greenChannelBitmap;
         private WriteableBitmap _blueChannelBitmap;
-
+        private WriteableBitmap? _hsvResultBitmap;
         private string _currentFilePath;
 
         public MainWindow()
@@ -39,15 +38,20 @@ namespace Lab1
                 _currentFilePath = openFileDialog.FileName;
                 _originalImage = new BitmapImage(new Uri(_currentFilePath));
                 OriginalImage.Source = _originalImage;
+                HsvOriginalImage.Source = _originalImage;
 
                 ProcessImage();
+                UpdateHsvPreview();
                 StatusText.Text = $"Загружено: {Path.GetFileName(_currentFilePath)}";
             }
         }
 
         private void SaveImage_Click(object sender, RoutedEventArgs e)
         {
-            if (_differenceBitmap == null)
+            WriteableBitmap? bitmapToSave = MainTabControl.SelectedIndex == 2
+                ? _hsvResultBitmap
+                : _differenceBitmap;
+            if (bitmapToSave == null)
             {
                 MessageBox.Show("Сначала загрузите изображение!", "Внимание",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -63,9 +67,32 @@ namespace Lab1
 
             if (saveFileDialog.ShowDialog() == true)
             {
-                SaveBitmapToFile(_differenceBitmap, saveFileDialog.FileName);
+                SaveBitmapToFile(bitmapToSave, saveFileDialog.FileName);
                 StatusText.Text = $"Сохранено: {Path.GetFileName(saveFileDialog.FileName)}";
             }
+        }
+
+        private void HsvSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!IsInitialized) return;
+            UpdateHsvPreview();
+        }
+
+        private void UpdateHsvPreview()
+        {
+            if (HueValueText == null || SaturationValueText == null || ValueValueText == null) return;
+
+            HueValueText.Text = $"{HueSlider.Value:+0;-0;0}°";
+            SaturationValueText.Text = $"{SaturationSlider.Value:+0;-0;0}%";
+            ValueValueText.Text = $"{ValueSlider.Value:+0;-0;0}%";
+
+            if (_originalImage == null) return;
+
+            _hsvResultBitmap = ImageProcessor.AdjustHsv(
+                ConvertToWritableBitmap(_originalImage), HueSlider.Value,
+                SaturationSlider.Value, ValueSlider.Value);
+            HsvResultImage.Source = _hsvResultBitmap;
+            HsvStatusText.Text = "Изменения применяются к исходному изображению. Результат будет сохранён в RGB.";
         }
 
         private void ProcessImage()

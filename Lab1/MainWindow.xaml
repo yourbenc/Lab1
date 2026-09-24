@@ -173,10 +173,44 @@
 
             <!-- Задание 3 (заглушка для третьего участника) -->
             <TabItem Header="Задание 3: HSV">
-                <Grid>
-                    <TextBlock Text="Задание 3: Преобразование RGB в HSV с ползунками" 
-                               FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Grid>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid Margin="15">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                            <TextBlock Text="Настройка изображения в пространстве HSV" FontSize="18" FontWeight="Bold" Margin="0,0,0,8"/>
+                            <TextBlock Text="Оттенок"/>
+                            <DockPanel Margin="0,0,0,6">
+                                <TextBlock x:Name="HueValueText" DockPanel.Dock="Right" Width="65" Text="0°" VerticalAlignment="Center" TextAlignment="Right"/>
+                                <Slider x:Name="HueSlider" Minimum="-180" Maximum="180" Value="0" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="HsvSlider_ValueChanged"/>
+                            </DockPanel>
+                            <TextBlock Text="Насыщенность"/>
+                            <DockPanel Margin="0,0,0,6">
+                                <TextBlock x:Name="SaturationValueText" DockPanel.Dock="Right" Width="65" Text="0%" VerticalAlignment="Center" TextAlignment="Right"/>
+                                <Slider x:Name="SaturationSlider" Minimum="-100" Maximum="100" Value="0" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="HsvSlider_ValueChanged"/>
+                            </DockPanel>
+                            <TextBlock Text="Яркость (Value)"/>
+                            <DockPanel>
+                                <TextBlock x:Name="ValueValueText" DockPanel.Dock="Right" Width="65" Text="0%" VerticalAlignment="Center" TextAlignment="Right"/>
+                                <Slider x:Name="ValueSlider" Minimum="-100" Maximum="100" Value="0" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="HsvSlider_ValueChanged"/>
+                            </DockPanel>
+                        </StackPanel>
+                        <TextBlock Grid.Row="1" x:Name="HsvStatusText" Text="Загрузите изображение, чтобы начать." Margin="0,0,0,8"/>
+                        <WrapPanel Grid.Row="2" HorizontalAlignment="Center">
+                            <StackPanel Margin="8" HorizontalAlignment="Center">
+                                <TextBlock Text="Оригинал" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <Image x:Name="HsvOriginalImage" Width="350" Height="350" Stretch="Uniform" Margin="5"/>
+                            </StackPanel>
+                            <StackPanel Margin="8" HorizontalAlignment="Center">
+                                <TextBlock Text="Результат HSV → RGB" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <Image x:Name="HsvResultImage" Width="350" Height="350" Stretch="Uniform" Margin="5"/>
+                            </StackPanel>
+                        </WrapPanel>
+                    </Grid>
+                </ScrollViewer>
             </TabItem>
         </TabControl>
     </Grid>
